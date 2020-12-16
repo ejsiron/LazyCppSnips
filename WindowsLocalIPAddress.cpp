@@ -12,7 +12,6 @@
 
 constexpr size_t MaxAddressTextLength{ 46 };
 
-static HANDLE AddressChangedHandle{};
 static std::mutex consolemutex{};
 static std::mutex tablemutex{};
 static std::multimap<IF_INDEX, std::wstring> InterfaceAddresses{};
@@ -122,6 +121,7 @@ int main()
 	LoadAllIPAddresses();
 	std::wstring LocalRoutineContext{ L"LocalContext" };
 	std::wcout << L"Registered context ID: " << LocalRoutineContext << std::endl;
+	HANDLE AddressChangedHandle{};
 	auto RegistrationResult{ NotifyUnicastIpAddressChange(AF_UNSPEC, IpAddressChanged, &LocalRoutineContext, TRUE, &AddressChangedHandle) };
 	consolemutex.lock();
 	std::wcout << std::endl << L"Press [A] to see address table. Press [Q] to end." << std::endl << std::endl;
@@ -143,6 +143,14 @@ int main()
 			std::wcout << std::endl;
 		}
 	} while (KeyChar != L'q' && KeyChar != L'Q');
-	std::thread(CancelMibChangeNotify2, &AddressChangedHandle).detach();
+	if (AddressChangedHandle)
+	{
+		CancelMibChangeNotify2(AddressChangedHandle);
+		std::wcout << L"Deregistered listener";
+	}
+	else
+	{
+		std::wcout << L"Windows says that it has no notification handle to unregister" << std::endl;
+	}
 	return 0;
 }
