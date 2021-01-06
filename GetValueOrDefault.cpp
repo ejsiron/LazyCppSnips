@@ -1,36 +1,51 @@
-// Start with a class that has a data member of a pointer type.
-// Supply the pointer (ptr)
-// Supply the type of the class targeted by the pointer (PointedClass)
-//   and the name of its data member that you want to retrieve (ClassMemberName)
-//
-// If the class pointer (ptr) is nullptr, then the function returns a default-
-//   constructed instance of PointedClassMemberType
-// If the class pointer (ptr) is not nullptr, then the function returns the value
-//   in ptr->ClassMemberName.
-// The function does not check if ptr->ClassMemberName has a valid value. If it
-//   does not, this function may throw
-// If PointedClassMemberType does not have a default constructor, use
-//   GetValueOrDefault(PointedClass* ptr, PointedClassMemberType PointedClass::* ClassMemberName)
 template <typename PointedClassMemberType, typename PointedClass>
-PointedClassMemberType GetValueOrDefault(PointedClass* ptr, PointedClassMemberType PointedClass::* ClassMemberName)
+PointedClassMemberType GetValueOrDefault(const PointedClass* ptr, const PointedClassMemberType PointedClass::* ClassMemberName)
 {
-  return GetValueOrDefault(ptr, ClassMemberName, PointedClassMemberType{});
+	return GetValueOrDefault(ptr, ClassMemberName, PointedClassMemberType{});
 }
 
-// Start with a class that has a data member of a pointer type.
-// Supply the pointer (ptr)
-// Supply the type of the class targeted by the pointer (PointedClass)
-//   and the name of its data member that you want to retrieve (ClassMemberName)
-// Supply the value that you want to use as a default (DefaultValue)
-//
-// If the class pointer (ptr) is nullptr, then the function returns DefaultValue
-// If the class pointer (ptr) is not nullptr, then the function returns the value
-//   in ptr->ClassMemberName.
-// The function does not check if ptr->ClassMemberName has a valid value. If it
-//   does not, this function may throw
 template <typename PointedClassMemberType, typename PointedClass>
-PointedClassMemberType GetValueOrDefault(PointedClass* ptr, PointedClassMemberType PointedClass::* ClassMemberName, PointedClassMemberType&& DefaultValue)
+PointedClassMemberType GetValueOrDefault(const PointedClass* ptr, const PointedClassMemberType PointedClass::* ClassMemberName, PointedClassMemberType&& DefaultValue)
 {
-  return ptr == nullptr ?
-    DefaultValue : ptr->*ClassMemberName;
+	return ptr == nullptr ?
+		DefaultValue : ptr->*ClassMemberName;
+}
+
+// demonstration
+
+#include <memory>
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class A
+{
+public:
+	int dat{ 50 };
+	unsigned int mt{ 900 };
+	wstring words{ L"Words" };
+};
+
+class B
+{
+public:
+	unique_ptr<A> aptr{ nullptr };
+};
+
+int main()
+{
+	A ConstructedA{};
+	B BWithConstructedA{};
+	BWithConstructedA.aptr = make_unique<A>(ConstructedA);
+	B BWithoutConstructedA{};
+	wcout << L"A.dat from B with a valid A pointer: " << BWithConstructedA.aptr->dat << endl;
+	wcout << L"A.mt from B with a valid A pointer: " << BWithConstructedA.aptr->mt << endl;
+	wcout << L"A.words from B with a valid A pointer: " << BWithConstructedA.aptr->words << endl << endl;
+	wcout << L"Default-constructed A.dat from B with an A null pointer: " <<
+		GetValueOrDefault(BWithoutConstructedA.aptr.get(), &A::dat) << endl;
+	wcout << L"Overriden default A.mt from B with an A null pointer: " <<
+		GetValueOrDefault(BWithoutConstructedA.aptr.get(), &A::mt, 42u) << endl;
+	wcout << L"Overriden default A.words from B with an A null pointer: " <<
+		GetValueOrDefault(BWithoutConstructedA.aptr.get(), &A::words, wstring{ L"forty-two" }) << endl;
 }
