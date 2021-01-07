@@ -39,9 +39,9 @@ int main()
 	B BWithConstructedA{};
 	BWithConstructedA.aptr = make_unique<A>(ConstructedA);
 	B BWithoutConstructedA{};
-	wcout << L"A.dat from B with a valid A pointer: " << BWithConstructedA.aptr->dat << endl;
-	wcout << L"A.mt from B with a valid A pointer: " << BWithConstructedA.aptr->mt << endl;
-	wcout << L"A.words from B with a valid A pointer: " << BWithConstructedA.aptr->words << endl << endl;
+	wcout << L"A.dat from B with a valid A pointer: " << GetValueOrDefault(BWithConstructedA.aptr.get(), &A::dat) << endl;
+	wcout << L"A.mt from B with a valid A pointer: " << GetValueOrDefault(BWithConstructedA.aptr.get(), &A::mt) << endl;
+	wcout << L"A.words from B with a valid A pointer: " << GetValueOrDefault(BWithConstructedA.aptr.get(), &A::words) << endl << endl;
 	wcout << L"Default-constructed A.dat from B with an A null pointer: " <<
 		GetValueOrDefault(BWithoutConstructedA.aptr.get(), &A::dat) << endl;
 	wcout << L"Overriden default A.mt from B with an A null pointer: " <<
